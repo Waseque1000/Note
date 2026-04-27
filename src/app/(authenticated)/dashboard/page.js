@@ -45,13 +45,13 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-12 animate-fade-in pb-20">
+    <div className="space-y-8 md:space-y-12 animate-fade-in pb-20">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h1>
           <p className="text-gray-500 text-sm mt-1">Monitor your journal activity and recent entries.</p>
         </div>
-        <Link href="/notes" className="px-6 py-3 bg-[#D98B5F] text-white font-bold rounded-xl hover:bg-[#C47A50] transition-all flex items-center gap-2 shadow-sm">
+        <Link href="/notes" className="w-full md:w-auto px-6 py-3 bg-[#D98B5F] text-white font-bold rounded-xl hover:bg-[#C47A50] transition-all flex items-center justify-center gap-2 shadow-sm">
           <Plus size={20} />
           New Entry
         </Link>
@@ -64,22 +64,22 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-6">
-                <div className={`w-14 h-14 rounded-2xl ${stat.bg} flex items-center justify-center`}>
-                  <stat.icon className={stat.color} size={28} />
+              <div key={index} className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-6">
+                <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl ${stat.bg} flex items-center justify-center shrink-0`}>
+                  <stat.icon className={stat.color} size={24} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-500">{stat.title}</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                  <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wider">{stat.title}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
                 </div>
               </div>
             ))}
           </div>
 
           <section className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center px-1">
               <h2 className="text-xl font-bold text-gray-900">Recently Updated</h2>
               <Link href="/notes" className="text-sm font-semibold text-[#D98B5F] hover:underline flex items-center gap-1">
                 View all
@@ -87,10 +87,10 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {recentNotes.length > 0 ? (
                 recentNotes.map((note) => (
-                  <Link key={note._id} href="/notes" className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+                  <Link key={note._id} href="/notes" className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                     <div className="flex justify-between items-start mb-4">
                       <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:text-[#D98B5F] transition-colors">
                          <Clock size={20} />
@@ -98,7 +98,7 @@ export default function DashboardPage() {
                       {note.isPinned && <div className="w-2 h-2 rounded-full bg-amber-400 shadow-sm" />}
                     </div>
                     <h3 className="font-bold text-gray-900 group-hover:text-[#D98B5F] transition-colors mb-2 line-clamp-1">{note.title}</h3>
-                    <p className="text-gray-500 text-sm line-clamp-3 leading-relaxed mb-4">{note.content}</p>
+                    <p className="text-gray-500 text-sm line-clamp-2 md:line-clamp-3 leading-relaxed mb-4">{note.content}</p>
                     <div className="flex flex-wrap gap-2">
                       {note.tags?.slice(0, 2).map((tag, idx) => (
                         <span key={idx} className="text-[10px] font-bold text-gray-400 px-2 py-1 bg-gray-50 rounded-md">
@@ -109,7 +109,7 @@ export default function DashboardPage() {
                   </Link>
                 ))
               ) : (
-                <div className="col-span-full py-20 text-center bg-white rounded-2xl border border-gray-100 border-dashed">
+                <div className="col-span-full py-16 md:py-20 text-center bg-white rounded-2xl border border-gray-100 border-dashed">
                   <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">No entries yet</p>
                   <Link href="/notes" className="mt-4 inline-block text-[#D98B5F] font-bold text-sm hover:underline">
                     Create your first note
