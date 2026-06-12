@@ -63,12 +63,12 @@ const Column = ({ id, title, tasks, onAddTask, onEditTask, dotColor }) => {
   const { setNodeRef } = useSortable({ id });
 
   return (
-    <div className="flex flex-col w-[320px] md:w-[350px] shrink-0 bg-[#FCFAF7] rounded-[2rem] p-5 border border-gray-100 shadow-sm h-full max-h-full">
+    <div className="flex flex-col w-[85vw] max-w-[320px] md:max-w-[350px] shrink-0 rounded-[2rem] p-5 h-full max-h-full border border-gray-200 snap-center">
       <div className="flex justify-between items-center mb-6 px-1">
         <div className="flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dotColor }}></div>
-          <h3 className="font-bold text-gray-900 text-base">{title}</h3>
-          <span className="px-2 py-0.5 rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-400">
+          <h3 className="font-bold text-gray-900 text-[15px]">{title}</h3>
+          <span className="px-2 py-0.5 rounded-full bg-white border border-gray-200 text-[11px] font-bold text-gray-400 shadow-sm">
             {tasks.length}
           </span>
         </div>
@@ -76,7 +76,7 @@ const Column = ({ id, title, tasks, onAddTask, onEditTask, dotColor }) => {
           onClick={() => onAddTask && onAddTask(id)}
           className="text-gray-400 hover:text-gray-600 transition-colors"
         >
-          <Plus size={18} />
+          <Plus size={16} strokeWidth={2.5} />
         </button>
       </div>
 
@@ -88,12 +88,12 @@ const Column = ({ id, title, tasks, onAddTask, onEditTask, dotColor }) => {
         </SortableContext>
         
         {tasks.length === 0 && (
-          <div className="h-40 border border-dashed border-gray-200 bg-gray-50/50 rounded-2xl flex flex-col items-center justify-center text-center p-4">
+          <div className="h-[200px] border border-dashed border-gray-200/60 bg-gray-50/30 rounded-[2rem] flex flex-col items-center justify-center text-center p-4">
             <div className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 mb-3 shadow-sm">
-              <Inbox size={20} />
+              <Inbox size={18} strokeWidth={2} />
             </div>
-            <p className="text-sm font-bold text-gray-500 mb-1">Nothing here yet</p>
-            <p className="text-xs text-gray-400">Drag tasks here or create a new one.</p>
+            <p className="text-[13px] font-bold text-gray-600 mb-0.5">Nothing here yet</p>
+            <p className="text-[11px] text-gray-400 font-medium">Drag tasks here or create a new one.</p>
           </div>
         )}
       </div>
@@ -156,7 +156,7 @@ export default function KanbanBoard({ tasks = [], onTaskMove, onAddTask, onEditT
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex flex-row gap-6 overflow-x-auto pb-4 h-full items-start w-full custom-scrollbar">
+      <div className="flex gap-4 md:gap-6 h-full overflow-x-auto custom-scrollbar pb-4 snap-x snap-mandatory">
         <Column id="todo" title="To Do" tasks={columns['todo']} onAddTask={onAddTask} onEditTask={onEditTask} dotColor="#3B82F6" />
         <Column id="in-progress" title="In Progress" tasks={columns['in-progress']} onAddTask={onAddTask} onEditTask={onEditTask} dotColor="#F59E0B" />
         <Column id="done" title="Completed" tasks={columns['done']} onAddTask={onAddTask} onEditTask={onEditTask} dotColor="#10B981" />
