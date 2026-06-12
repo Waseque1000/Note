@@ -2,124 +2,195 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  StickyNote, 
-  Sparkles,
-  ArrowRight,
-  TrendingUp,
-  Clock,
-  Plus,
+  CheckCircle2, 
+  ListTodo, 
+  TrendingUp, 
+  Flame,
   Loader2
 } from "lucide-react";
-import Link from 'next/link';
-import axios from 'axios';
-import { format } from 'date-fns';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar
+} from 'recharts';
 
 export default function DashboardPage() {
-  const [notes, setNotes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchNotes();
+    fetchTasks();
   }, []);
 
-  const fetchNotes = async () => {
+  const fetchTasks = async () => {
     try {
-      const { data } = await axios.get('/api/notes');
-      setNotes(data);
+      const res = await fetch('/api/tasks');
+      const data = await res.json();
+      setTasks(data);
     } catch (error) {
-      console.error("Failed to fetch notes");
+      console.error("Failed to fetch tasks:", error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const pinnedCount = notes.filter(n => n.isPinned).length;
-  const recentNotes = [...notes]
-    .sort((a, b) => new Date(b.updatedAt || b.date) - new Date(a.updatedAt || a.date))
-    .slice(0, 3);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#D98B5F]" />
+      </div>
+    );
+  }
 
-  const stats = [
-    { title: "Total Notes", value: notes.length, icon: StickyNote, color: "text-blue-500", bg: "bg-blue-50" },
-    { title: "Pinned Items", value: pinnedCount, icon: Sparkles, color: "text-amber-500", bg: "bg-amber-50" },
-    { title: "Last Update", value: notes.length > 0 ? format(new Date(recentNotes[0]?.updatedAt || recentNotes[0]?.date), 'MMM dd') : 'None', icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-50" },
+  const completedTasks = tasks.filter(t => t.status === 'done').length;
+  const totalTasks = tasks.length;
+  const avgCompletion = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  // Placeholder data for charts
+  const trendData = [
+    { name: 'Mon', completion: 45 },
+    { name: 'Tue', completion: 52 },
+    { name: 'Wed', completion: 38 },
+    { name: 'Thu', completion: 65 },
+    { name: 'Fri', completion: 48 },
+    { name: 'Sat', completion: 80 },
+    { name: 'Sun', completion: avgCompletion },
+  ];
+
+  const statusData = [
+    { name: 'To Do', count: tasks.filter(t => t.status === 'todo').length, fill: '#E2E8F0' },
+    { name: 'In Progress', count: tasks.filter(t => t.status === 'in-progress').length, fill: '#FDE68A' },
+    { name: 'Done', count: completedTasks, fill: '#D1FAE5' },
   ];
 
   return (
-    <div className="space-y-8 md:space-y-12 animate-fade-in pb-20">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="max-w-[1600px] mx-auto p-4 md:p-8 space-y-6">
+      
+      {/* Productivity Overview Header */}
+      <div className="bg-gradient-to-r from-[#FDFBF7] to-[#F3EBE4] border border-[#EBE4DC] rounded-2xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h1>
-          <p className="text-gray-500 text-sm mt-1">Monitor your journal activity and recent entries.</p>
-        </div>
-        <Link href="/notes" className="w-full md:w-auto px-6 py-3 bg-[#D98B5F] text-white font-bold rounded-xl hover:bg-[#C47A50] transition-all flex items-center justify-center gap-2 shadow-sm">
-          <Plus size={20} />
-          New Entry
-        </Link>
-      </header>
-
-      {isLoading ? (
-        <div className="h-64 flex flex-col items-center justify-center gap-4 text-gray-300">
-          <Loader2 className="animate-spin text-[#D98B5F]" size={40} />
-          <p className="text-sm font-bold uppercase tracking-widest">Syncing Data...</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-6">
-                <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl ${stat.bg} flex items-center justify-center shrink-0`}>
-                  <stat.icon className={stat.color} size={24} />
-                </div>
-                <div>
-                  <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wider">{stat.title}</p>
-                  <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                </div>
-              </div>
-            ))}
+          <p className="text-sm text-gray-500 font-medium mb-1">Your productivity overview</p>
+          <div className="flex items-baseline gap-2">
+             <h1 className="text-4xl font-extrabold text-gray-900">{completedTasks} tasks done</h1>
+             <span className="text-2xl font-semibold text-gray-400">/ {totalTasks} planned</span>
           </div>
+        </div>
+        <div className="flex bg-white rounded-full p-1 border border-gray-200/60 shadow-sm">
+           {['7d', '14d', '30d', '90d'].map((range, i) => (
+             <button 
+               key={range}
+               className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
+                 i === 1 ? 'bg-[#D98B5F] text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+               }`}
+             >
+               {range}
+             </button>
+           ))}
+        </div>
+      </div>
 
-          <section className="space-y-6">
-            <div className="flex justify-between items-center px-1">
-              <h2 className="text-xl font-bold text-gray-900">Recently Updated</h2>
-              <Link href="/notes" className="text-sm font-semibold text-[#D98B5F] hover:underline flex items-center gap-1">
-                View all
-                <ArrowRight size={16} />
-              </Link>
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-start gap-4">
+            <div className="bg-[#FFF5F0] p-3 rounded-xl">
+               <ListTodo className="text-[#D98B5F] w-6 h-6" />
             </div>
+            <div>
+               <p className="text-sm font-semibold text-gray-500 mb-1">Total Tasks</p>
+               <p className="text-2xl font-bold text-gray-900">{totalTasks}</p>
+            </div>
+         </div>
+         
+         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-start gap-4">
+            <div className="bg-green-50 p-3 rounded-xl">
+               <CheckCircle2 className="text-green-600 w-6 h-6" />
+            </div>
+            <div>
+               <p className="text-sm font-semibold text-gray-500 mb-1">Completed</p>
+               <p className="text-2xl font-bold text-gray-900">{completedTasks}</p>
+            </div>
+         </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {recentNotes.length > 0 ? (
-                recentNotes.map((note) => (
-                  <Link key={note._id} href="/notes" className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:text-[#D98B5F] transition-colors">
-                         <Clock size={20} />
-                      </div>
-                      {note.isPinned && <div className="w-2 h-2 rounded-full bg-amber-400 shadow-sm" />}
-                    </div>
-                    <h3 className="font-bold text-gray-900 group-hover:text-[#D98B5F] transition-colors mb-2 line-clamp-1">{note.title}</h3>
-                    <p className="text-gray-500 text-sm line-clamp-2 md:line-clamp-3 leading-relaxed mb-4">{note.content}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {note.tags?.slice(0, 2).map((tag, idx) => (
-                        <span key={idx} className="text-[10px] font-bold text-gray-400 px-2 py-1 bg-gray-50 rounded-md">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="col-span-full py-16 md:py-20 text-center bg-white rounded-2xl border border-gray-100 border-dashed">
-                  <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">No entries yet</p>
-                  <Link href="/notes" className="mt-4 inline-block text-[#D98B5F] font-bold text-sm hover:underline">
-                    Create your first note
-                  </Link>
-                </div>
-              )}
+         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-start gap-4">
+            <div className="bg-blue-50 p-3 rounded-xl">
+               <TrendingUp className="text-blue-600 w-6 h-6" />
             </div>
-          </section>
-        </>
-      )}
+            <div>
+               <p className="text-sm font-semibold text-gray-500 mb-1">Avg Completion</p>
+               <p className="text-2xl font-bold text-gray-900">{avgCompletion}%</p>
+            </div>
+         </div>
+
+         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-start gap-4">
+            <div className="bg-amber-50 p-3 rounded-xl">
+               <Flame className="text-amber-500 w-6 h-6" />
+            </div>
+            <div>
+               <p className="text-sm font-semibold text-gray-500 mb-1">Current Streak</p>
+               <p className="text-2xl font-bold text-gray-900">3 days</p>
+            </div>
+         </div>
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+         {/* Completion Trend */}
+         <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="mb-6">
+               <h3 className="text-lg font-bold text-gray-900">Completion Trend</h3>
+               <p className="text-sm text-gray-500">Daily completion rate across the selected range</p>
+            </div>
+            <div className="h-[300px] w-full">
+               <ResponsiveContainer width="100%" height="100%">
+                 <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                   <defs>
+                     <linearGradient id="colorCompletion" x1="0" y1="0" x2="0" y2="1">
+                       <stop offset="5%" stopColor="#D98B5F" stopOpacity={0.1}/>
+                       <stop offset="95%" stopColor="#D98B5F" stopOpacity={0}/>
+                     </linearGradient>
+                   </defs>
+                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} dy={10} />
+                   <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} tickFormatter={(val) => `${val}%`} />
+                   <Tooltip 
+                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                     formatter={(value) => [`${value}%`, 'Completion']}
+                   />
+                   <Area type="monotone" dataKey="completion" stroke="#D98B5F" strokeWidth={3} fillOpacity={1} fill="url(#colorCompletion)" />
+                 </AreaChart>
+               </ResponsiveContainer>
+            </div>
+         </div>
+
+         {/* Status Breakdown */}
+         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="mb-6">
+               <h3 className="text-lg font-bold text-gray-900">Status Breakdown</h3>
+               <p className="text-sm text-gray-500">Tasks by current status</p>
+            </div>
+            <div className="h-[300px] w-full">
+               <ResponsiveContainer width="100%" height="100%">
+                 <BarChart data={statusData} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                   <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
+                   <XAxis type="number" hide />
+                   <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#4B5563', fontSize: 13, fontWeight: 600}} width={90} />
+                   <Tooltip 
+                     cursor={{fill: '#f9fafb'}}
+                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                   />
+                   <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={32} />
+                 </BarChart>
+               </ResponsiveContainer>
+            </div>
+         </div>
+      </div>
+
     </div>
   );
 }

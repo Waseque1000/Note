@@ -1,9 +1,11 @@
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
+import { Toaster } from 'react-hot-toast';
 
 export default function AuthenticatedLayout({ children }) {
   return (
     <div className="flex h-screen bg-white transition-colors">
+      <Toaster position="bottom-right" />
       {/* Sidebar removed as per user request */}
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar />

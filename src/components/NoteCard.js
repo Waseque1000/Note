@@ -1,6 +1,5 @@
 'use client';
-
-import { Pin, Trash2, Edit3, Calendar } from "lucide-react";
+import { Pin, Trash2, Edit3 } from "lucide-react";
 import { format } from "date-fns";
 
 export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
@@ -10,73 +9,130 @@ export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
   const contentSize = content?.length || 0;
   const progress = Math.min((contentSize / MAX_SIZE) * 100, 100);
   
+  // Custom transparent colors based on note color for a soft pastel look
+  const accentColor = color || '#D98B5F';
+  const softBg = `${accentColor}08`; // ~3% opacity
+  const softBorder = `${accentColor}25`; // ~14% opacity
+  const tagBg = `${accentColor}12`; // ~7% opacity
+  
+  const handleCardClick = (e) => {
+    // Prevent triggering edit if clicking on action buttons
+    if (e.target.closest('button')) return;
+    onEdit(note);
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col h-full overflow-hidden">
+    <div 
+      onClick={handleCardClick}
+      className="group relative bg-white rounded-2xl border border-gray-100 hover:border-gray-200/80 shadow-sm hover:shadow-md hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full overflow-hidden cursor-pointer"
+      style={{ 
+        backgroundColor: softBg,
+        borderColor: softBorder
+      }}
+    >
       {/* Top Accent Strip */}
       <div 
-        className="h-1.5 w-full" 
-        style={{ backgroundColor: color || '#D98B5F' }} 
+        className="h-1.5 w-full shrink-0" 
+        style={{ backgroundColor: accentColor }} 
       />
 
-      <div className="p-6 flex-1 flex flex-col">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1">
-            <h3 className="font-bold text-lg text-gray-900 line-clamp-1 leading-tight group-hover:text-[#D98B5F] transition-colors">{title}</h3>
-            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mt-1">
-              {date ? format(new Date(date), 'MMM dd, yyyy') : 'Recently'}
-            </p>
+      <div className="p-6 flex-1 flex flex-col justify-between">
+        <div>
+          {/* Title and Pin Button */}
+          <div className="flex justify-between items-start mb-3 gap-2">
+            <h3 className="font-bold text-base md:text-lg text-gray-900 group-hover:text-primary transition-colors line-clamp-1 leading-tight">
+              {title}
+            </h3>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onTogglePin(note);
+              }}
+              className={`p-1.5 rounded-lg transition-all shrink-0 hover:bg-white/80 active:scale-95 ${
+                isPinned 
+                  ? "text-amber-500 bg-amber-500/10 shadow-sm" 
+                  : "text-gray-300 hover:text-amber-500"
+              }`}
+            >
+              <Pin size={15} fill={isPinned ? "currentColor" : "none"} />
+            </button>
           </div>
-          <button 
-            onClick={() => onTogglePin(note)}
-            className={`p-1.5 rounded-lg transition-all ${isPinned ? "text-[#D98B5F] bg-[#D98B5F]/5" : "text-gray-300 hover:text-[#D98B5F]"}`}
-          >
-            <Pin size={16} fill={isPinned ? "currentColor" : "none"} />
-          </button>
+          
+          {/* Note Content */}
+          <p className="text-gray-600 text-xs md:text-sm leading-relaxed mb-5 line-clamp-4 font-medium whitespace-pre-wrap">
+            {content}
+          </p>
         </div>
-        
-        <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-4 flex-1">
-          {content}
-        </p>
 
-        {/* Progress Bar */}
-        <div className="space-y-2 mb-6">
-          <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase">
-            <span>Entry Size</span>
-            <span>{contentSize} / {MAX_SIZE}</span>
+        {/* Footer Area with Progress, Tags & Actions */}
+        <div className="space-y-4">
+          {/* Progress Bar */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+              <span>Size Indicator</span>
+              <span>{contentSize} / {MAX_SIZE}</span>
+            </div>
+            <div className="h-1.5 w-full bg-gray-100/80 rounded-full overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all duration-500" 
+                style={{ 
+                  width: `${progress}%`, 
+                  backgroundColor: accentColor 
+                }} 
+              />
+            </div>
           </div>
-          <div className="progress-bar-bg">
-            <div 
-              className="progress-bar-fill"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-        
-        <div className="flex flex-wrap gap-1.5">
-          {tags?.map((tag, index) => (
-            <span key={index} className="text-[10px] font-bold text-gray-500 px-2 py-1 bg-gray-50 rounded-md">
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
+          
+          {/* Tags list & Actions Row */}
+          <div className="flex justify-between items-center pt-1 gap-2">
+            {/* Tags */}
+            <div className="flex flex-wrap gap-1 max-w-[70%]">
+              {tags?.slice(0, 3).map((tag, index) => (
+                <span 
+                  key={index} 
+                  className="text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider"
+                  style={{
+                    backgroundColor: tagBg,
+                    color: accentColor
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
+              {tags?.length > 3 && (
+                <span className="text-[9px] font-bold text-gray-400 px-1 py-0.5">
+                  +{tags.length - 3}
+                </span>
+              )}
+            </div>
 
-      <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-50 flex gap-2">
-        <button 
-          onClick={() => onEdit(note)}
-          className="flex-1 h-9 bg-white border border-gray-200 text-gray-700 text-[11px] font-bold rounded-lg hover:bg-gray-50 transition-all flex items-center justify-center gap-1.5"
-        >
-          <Edit3 size={14} />
-          Edit
-        </button>
-        <button 
-          onClick={() => onDelete(note._id)}
-          className="flex-1 h-9 bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-100 text-[11px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5"
-        >
-          <Trash2 size={14} />
-          Delete
-        </button>
+            {/* Hover Actions (highly stylized) */}
+            <div className="flex items-center gap-1 opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(note);
+                }}
+                className="p-2 bg-white/90 hover:bg-white border border-gray-100 text-gray-600 hover:text-primary rounded-lg transition-all active:scale-95 shadow-sm"
+                title="Edit Note"
+              >
+                <Edit3 size={13} />
+              </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(note._id);
+                }}
+                className="p-2 bg-white/90 hover:bg-red-50 border border-gray-100 hover:border-red-100 text-gray-400 hover:text-red-500 rounded-lg transition-all active:scale-95 shadow-sm"
+                title="Delete Note"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
